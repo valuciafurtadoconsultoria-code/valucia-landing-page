@@ -22,8 +22,8 @@ import {
 const CONFIG = {
   whatsapp: "5541996987079",
   images: {
-    hero: "/Images/IMG_9855.jpg", 
-    bio: "/Images/IMG_9413.jpg",
+    hero: "/Images/IMG_9855.webp", 
+    bio: "/Images/IMG_9413.webp",
   },
 };
 
