@@ -1,4 +1,4 @@
-import React, { useMemo, useState, useEffect } from "react";
+import React, { useMemo, useState, useEffect, useRef } from "react";
 import { 
   ChevronRight, 
   MessageCircle, 
@@ -22,13 +22,19 @@ import {
 const CONFIG = {
   whatsapp: "5541996987079",
   images: {
-    hero: "/Images/quadro.png", 
+    hero: "/Images/IMG_9855.jpg", 
     bio: "/Images/IMG_9413.jpg",
   },
 };
 
+/**
+ * Componente de Imagem Otimizado
+ * Focado em performance e resolução do problema de pixelização.
+ */
 function ImageWithFallback({ src, alt, className }) {
   const [failed, setFailed] = useState(false);
+  const [isLoaded, setIsLoaded] = useState(false);
+  
   if (failed) {
     return (
       <div className={`${className} flex flex-col items-center justify-center bg-slate-100 text-slate-400 border border-slate-200`}>
@@ -39,7 +45,46 @@ function ImageWithFallback({ src, alt, className }) {
       </div>
     );
   }
-  return <img src={src} alt={alt} className={className} loading="lazy" onError={() => setFailed(true)} />;
+
+  return (
+    <div className={`${className} bg-slate-100 relative overflow-hidden`}>
+      <img 
+        src={src} 
+        alt={alt} 
+        onLoad={() => setIsLoaded(true)}
+        className={`w-full h-full object-cover transition-opacity duration-500 ${isLoaded ? 'opacity-100' : 'opacity-0'}`}
+        loading="lazy" 
+        onError={() => setFailed(true)} 
+        style={{
+          imageRendering: 'auto',
+          WebkitBackfaceVisibility: 'hidden',
+          backfaceVisibility: 'hidden',
+          transform: 'translateZ(0)',
+          fontSmoothing: 'antialiased'
+        }}
+      />
+    </div>
+  );
+}
+
+/**
+ * Hook para detetar quando o elemento entra no ecrã (Otimização de Performance)
+ */
+function useOnScreen(ref) {
+  const [isIntersecting, setIntersecting] = useState(false);
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      ([entry]) => setIntersecting(entry.isIntersecting),
+      { threshold: 0.1 }
+    );
+    if (ref.current) {
+      observer.observe(ref.current);
+    }
+    return () => observer.disconnect();
+  }, [ref]);
+
+  return isIntersecting;
 }
 
 const AccordionItem = ({ question, answer }) => {
@@ -65,7 +110,16 @@ const AccordionItem = ({ question, answer }) => {
 const Navbar = () => {
   const [scrolled, setScrolled] = useState(false);
   useEffect(() => {
-    const handleScroll = () => setScrolled(window.scrollY > 20);
+    let ticking = false;
+    const handleScroll = () => {
+      if (!ticking) {
+        window.requestAnimationFrame(() => {
+          setScrolled(window.scrollY > 20);
+          ticking = false;
+        });
+        ticking = true;
+      }
+    };
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
@@ -96,12 +150,17 @@ export default function App() {
   const waLinkBase = `https://wa.me/${CONFIG.whatsapp}?text=`;
   const waLinkMain = waLinkBase + encodeURIComponent("Olá Valúcia, gostaria de entender como aplicar o Raio-X comercial na minha operação.");
   
+  // Refs para animação scroll-reveal
+  const heroRef = useRef();
+  const probRef = useRef();
+  const metodoRef = useRef();
+  
   return (
-    <main className="min-h-screen bg-white font-sans selection:bg-amber-100 selection:text-amber-900">
+    <main className="min-h-screen bg-white font-sans selection:bg-amber-100 selection:text-amber-900 overflow-x-hidden">
       <Navbar />
 
       {/* HERO SECTION */}
-      <section className="relative pt-40 pb-24 md:pt-60 md:pb-40 overflow-hidden bg-[#fcfcfd]">
+      <section ref={heroRef} className="relative pt-40 pb-12 md:pt-60 md:pb-20 overflow-hidden bg-[#fcfcfd]">
         <div className="absolute top-0 right-0 w-[800px] h-[800px] bg-amber-500/[0.03] rounded-full blur-[150px] -z-10 translate-x-1/3 -translate-y-1/3" />
         <div className="max-w-7xl mx-auto px-8 grid md:grid-cols-12 gap-16 items-center">
           <div className="md:col-span-7">
@@ -112,21 +171,11 @@ export default function App() {
               <p className="text-lg md:text-2xl text-slate-600 leading-relaxed max-w-xl mb-10 md:mb-12 font-medium">
                 Descubra por que a falta de condução comercial faz com que boas conversas no WhatsApp não avancem para a decisão de compra.
               </p>
-              <div className="flex flex-col sm:flex-row gap-6">
-                <a href="#problema" className="group inline-flex justify-center items-center gap-4 px-8 md:px-10 py-5 md:py-6 bg-slate-900 text-white font-bold hover:bg-amber-500 transition-all rounded-lg shadow-xl shadow-slate-200 text-center">
-                  Porque o dinheiro fica na mesa
-                  <ArrowRight size={18} className="group-hover:translate-x-2 transition-transform" />
-                </a>
-                <a href={waLinkMain} target="_blank" rel="noreferrer" className="inline-flex justify-center items-center gap-4 px-8 md:px-10 py-5 md:py-6 border border-slate-200 bg-white text-slate-900 font-bold hover:bg-slate-50 transition-all rounded-lg text-center">
-                  <MessageCircle size={20} className="text-emerald-500" />
-                  Falar no WhatsApp
-                </a>
-              </div>
             </div>
           </div>
           <div className="md:col-span-5 relative group mt-12 md:mt-0">
             <div className="relative z-10 overflow-hidden rounded-2xl border-8 border-white shadow-2xl transition-transform duration-700 group-hover:scale-[1.01]">
-              <ImageWithFallback src={heroImage} alt="Valúcia Furtado" className="w-full aspect-[3/4] object-cover transition-all duration-1000" />
+              <ImageWithFallback src={heroImage} alt="Valúcia Furtado" className="w-full aspect-[3/4]" />
             </div>
             <div className="absolute -bottom-6 -left-6 w-32 h-32 border-b-4 border-l-4 border-amber-500/20 rounded-bl-3xl -z-10" />
           </div>
@@ -134,7 +183,7 @@ export default function App() {
       </section>
 
       {/* SECÇÃO PROBLEMA */}
-      <section id="problema" className="py-24 md:py-48 bg-[#161a23] border-y border-white/5">
+      <section id="problema" ref={probRef} className="pt-12 pb-24 md:pt-20 md:pb-48 bg-[#161a23] border-y border-white/5">
         <div className="max-w-7xl mx-auto px-8 text-white">
           <div className="grid md:grid-cols-2 gap-12 md:gap-20 items-end mb-16 md:mb-24">
             <div>
@@ -165,8 +214,8 @@ export default function App() {
         </div>
       </section>
 
-      {/* SECÇÃO O RAIO-X (Texto Fiel) */}
-      <section id="metodo" className="py-24 md:py-40 bg-white relative overflow-hidden">
+      {/* SECÇÃO O RAIO-X */}
+      <section id="metodo" ref={metodoRef} className="py-24 md:py-40 bg-white relative overflow-hidden">
         <div className="max-w-7xl mx-auto px-8 relative z-10">
           <div className="text-center max-w-4xl mx-auto mb-20 md:mb-32">
             <span className="text-slate-400 font-black uppercase tracking-[0.4em] text-[10px] mb-6 block">O MÉTODO</span>
@@ -176,7 +225,7 @@ export default function App() {
             <div className="w-24 h-1 bg-amber-500 mx-auto rounded-full mt-10" />
           </div>
 
-          <div className="grid md:grid-cols-3 gap-12 md:gap-8 relative">
+          <div className="grid md:grid-cols-3 gap-12 md:gap-8 relative mb-16 md:mb-24">
             {[
               { 
                 icon: <FileSearch className="w-8 h-8" />, 
@@ -205,6 +254,13 @@ export default function App() {
               </div>
             ))}
           </div>
+
+          <div className="text-center">
+            <a href={waLinkMain} target="_blank" rel="noreferrer" className="group inline-flex justify-center items-center gap-4 px-8 md:px-12 py-5 md:py-6 bg-slate-900 text-white font-bold hover:bg-amber-500 transition-all rounded-xl shadow-xl shadow-slate-100 text-center text-lg md:text-xl">
+              Quero aplicar o Raio-X na minha operação
+              <ArrowRight size={20} className="group-hover:translate-x-2 transition-transform" />
+            </a>
+          </div>
         </div>
       </section>
 
@@ -226,7 +282,7 @@ export default function App() {
               { icon: <MonitorPlay size={28} />, title: "Sessão Executiva", desc: "Interpretação dos achados e definição de prioridades imediatas de ação." },
               { icon: <Droplets size={28} />, title: "Mapa de Vazamento", desc: "Diagnóstico técnico que revela onde a receita escorre durante a conversa e por que a venda não se concretiza." },
               { icon: <Gauge size={28} />, title: "Índice de Maturidade", desc: "Indicador técnico que mede o nível de evolução comercial da operação." },
-              { icon: <MessageCircleOff size={28} />, title: "Objeções Críticas", desc: "Leitura estruturada das objeções recorrentes e como contorná-las." }
+              { icon: <MessageCircleOff size={28} />, title: "Objeções Críticas", desc: "Leitura estruturada das objeções recorrentes e como contorná-los." }
             ].map((item, i) => (
               <div key={i} className="p-8 md:p-10 border border-slate-100 rounded-2xl bg-white hover:shadow-2xl transition-all group">
                 <div className="w-14 h-14 bg-slate-50 text-amber-600 rounded-lg shadow-sm flex items-center justify-center mb-6 md:mb-8 group-hover:bg-amber-500 group-hover:text-white transition-all">{item.icon}</div>
@@ -240,7 +296,7 @@ export default function App() {
 
       {/* BIO SECTION */}
       <section id="sobre" className="py-24 md:py-48 bg-[#0f1218] relative overflow-hidden">
-        <div className="max-w-7xl mx-auto px-8">
+        <div className="max-w-7xl mx-auto px-8 relative z-10">
           <div className="mb-12 md:mb-24 reveal">
             <span className="text-amber-400 font-black uppercase tracking-[0.4em] text-[10px] mb-6 block">Quem analisa o seu time</span>
             <h2 className="text-3xl md:text-6xl lg:text-7xl font-black leading-[1.1] tracking-tighter text-white max-w-5xl">
@@ -251,7 +307,7 @@ export default function App() {
           <div className="grid md:grid-cols-12 gap-12 md:gap-24 items-start">
             <div className="md:col-span-5 relative">
               <div className="aspect-[4/5] overflow-hidden rounded-3xl border border-white/10 shadow-2xl">
-                <ImageWithFallback src={bioImage} alt="Valúcia Furtado" className="w-full h-full object-cover" />
+                <ImageWithFallback src={bioImage} alt="Valúcia Furtado" className="w-full h-full" />
               </div>
               <div className="absolute -bottom-8 -right-8 bg-amber-500 p-6 md:p-8 rounded-2xl shadow-2xl hidden lg:block text-slate-950">
                 <p className="text-3xl md:text-4xl font-black leading-none">15+</p>
@@ -289,7 +345,7 @@ export default function App() {
               { q: "Já usamos ferramentas de WhatsApp e CRM. Ainda faz sentido?", a: "Sim. Ferramentas organizam fluxo e dados. A análise observa comportamento, linguagem e direção da conversa." },
               { q: "Em quanto tempo os resultados da análise ficam claros?", a: "A clareza costuma surgir já na devolutiva executiva, quando os padrões de condução e os pontos de vazamento de faturamento se tornam evidentes." },
               { q: "Isso serve para qualquer tipo de empresa?", a: "A análise é indicada para operações em que o WhatsApp é um canal relevante de venda e que contam com equipes a partir de três vendedores." },
-              { q: "O que acontece depois da análise?", a: "Com os achados consolidados, é construído um direcionamento claro de ação, com prioridades definidas e recomendações práticas sobre o que ajustar na condução das vendas." }
+              { q: "O que acontece depois da análise?", a: "Com os achados consolidados, é construído um dicionamento claro de ação, com prioridades definidas e recomendações práticas sobre o que ajustar na condução das vendas." }
             ].map((item, idx) => (
               <AccordionItem key={idx} question={item.q} answer={item.a} />
             ))}
@@ -299,7 +355,7 @@ export default function App() {
 
       {/* CTA FINAL */}
       <section id="contato" className="bg-white text-slate-900 py-24 md:py-48 relative overflow-hidden text-center">
-        <div className="max-w-5xl mx-auto px-8 relative z-10">
+        <div className="max-w-5xl mx-auto px-8 relative z-10 text-center space-y-12">
           <div className="reveal">
             <h2 className="text-4xl md:text-6xl font-black tracking-tight leading-tight mb-8">Transforme conversas em <span className="text-amber-500 underline decoration-amber-500/10 underline-offset-[12px]">faturamento</span></h2>
             <p className="mt-6 text-slate-600 text-lg md:text-3xl leading-relaxed max-w-2xl mx-auto font-medium mb-12 md:mb-16">
@@ -314,14 +370,14 @@ export default function App() {
       </section>
 
       <footer className="py-16 md:py-20 bg-slate-50 border-t border-slate-100 text-center">
-        <div className="text-[10px] font-black tracking-[0.5em] text-slate-300 uppercase mb-6">Valúcia Furtado</div>
+        <div className="text-[10px] font-black tracking-[0.5em] text-slate-300 uppercase mb-4">Valúcia Furtado</div>
         <p className="text-slate-400 text-[10px] font-bold uppercase tracking-widest">© {new Date().getFullYear()} — Consultoria de Estratégia Comercial</p>
       </footer>
       
       <style dangerouslySetInnerHTML={{ __html: `
         html { scroll-behavior: smooth; }
-        .reveal { animation: reveal 1.5s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
-        @keyframes reveal { from { opacity: 0; transform: translateY(40px); } to { opacity: 1; transform: translateY(0); } }
+        .reveal { animation: reveal 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards; opacity: 0; }
+        @keyframes reveal { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
       `}} />
     </main>
   );
