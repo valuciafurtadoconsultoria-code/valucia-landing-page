@@ -55,7 +55,6 @@ function ImageWithFallback({ src, alt, className, isPriority = false }) {
         alt={alt} 
         onLoad={() => setIsLoaded(true)}
         className={`w-full h-full object-cover transition-all duration-500 ease-out ${isLoaded ? 'opacity-100 scale-100' : 'opacity-0 scale-105'}`}
-        // CORREÇÃO: fetchpriority em minúsculas para eliminar erro do React
         fetchpriority={isPriority ? "high" : "auto"}
         loading={isPriority ? "eager" : "lazy"}
         decoding="async"
@@ -76,15 +75,15 @@ const AccordionItem = ({ question, answer }) => {
     <div className="border-b border-slate-200">
       <button 
         onClick={() => setIsOpen(!isOpen)}
-        className="w-full py-5 flex justify-between items-center text-left hover:text-amber-600 transition-colors focus:outline-none"
+        className="w-full py-6 flex justify-between items-center text-left hover:text-amber-600 transition-colors focus:outline-none"
       >
-        <span className="text-base md:text-lg font-bold text-slate-800 leading-tight">{question}</span>
+        <span className="text-lg font-bold text-slate-800 leading-tight">{question}</span>
         <div className="ml-4 flex-shrink-0">
           {isOpen ? <Minus size={20} className="text-amber-500" /> : <Plus size={20} className="text-slate-400" />}
         </div>
       </button>
-      <div className={`overflow-hidden transition-all duration-300 ${isOpen ? "max-h-[500px] pb-5" : "max-h-0"}`}>
-        <p className="text-slate-600 leading-relaxed text-base md:text-lg">{answer}</p>
+      <div className={`overflow-hidden transition-all duration-300 ${isOpen ? "max-h-[500px] pb-6" : "max-h-0"}`}>
+        <p className="text-slate-600 leading-relaxed text-lg">{answer}</p>
       </div>
     </div>
   );
@@ -99,18 +98,18 @@ const Navbar = () => {
   }, []);
 
   return (
-    <nav className={`fixed w-full z-50 transition-all duration-500 ${scrolled ? "bg-white/95 backdrop-blur-xl border-b border-slate-100 py-3 shadow-sm" : "bg-transparent py-6"}`}>
+    <nav className={`fixed w-full z-50 transition-all duration-500 ${scrolled ? "bg-white/95 backdrop-blur-xl border-b border-slate-100 py-4 shadow-sm" : "bg-transparent py-8"}`}>
       <div className="max-w-7xl mx-auto px-6 flex justify-between items-center">
-        <div className="text-base md:text-lg font-black tracking-[0.2em] uppercase text-slate-900">
+        <div className="text-lg font-black tracking-[0.3em] uppercase text-slate-900">
           Valúcia<span className="text-amber-500">.</span>Furtado
         </div>
         <div className="hidden lg:flex items-center gap-8 text-[11px] font-bold uppercase tracking-[0.2em] text-slate-600">
-          <a href="#problema" className="hover:text-amber-600">O Problema</a>
-          <a href="#metodo" className="hover:text-amber-600">Raio-X</a>
-          <a href="#entregaveis" className="hover:text-amber-600">Entregáveis</a>
-          <a href="#sobre" className="hover:text-amber-600">Sobre</a>
-          <a href="#faq" className="hover:text-amber-600">FAQ</a>
-          <a href="#contato" className="bg-slate-900 text-white px-5 py-2 rounded-lg font-black hover:bg-amber-500 transition-all">Contato</a>
+          <a href="#problema" className="hover:text-amber-600 transition-colors">O Problema</a>
+          <a href="#metodo" className="hover:text-amber-600 transition-colors">Raio-X</a>
+          <a href="#entregaveis" className="hover:text-amber-600 transition-colors">Entregáveis</a>
+          <a href="#sobre" className="hover:text-amber-600 transition-colors">Sobre</a>
+          <a href="#faq" className="hover:text-amber-600 transition-colors">FAQ</a>
+          <a href="#contato" className="bg-slate-900 text-white px-6 py-2.5 rounded-md font-black hover:bg-amber-500 transition-all">Contato</a>
         </div>
       </div>
     </nav>
@@ -125,9 +124,9 @@ export default function App() {
       <Navbar />
 
       {/* HERO SECTION */}
-      <section className="relative pt-24 pb-12 md:pt-60 md:pb-20 overflow-hidden bg-[#fcfcfd]">
+      <section className="relative pt-28 pb-12 md:pt-60 md:pb-20 overflow-hidden bg-[#fcfcfd]">
         <div className="absolute top-0 right-0 w-[800px] h-[800px] bg-amber-500/[0.03] rounded-full blur-[150px] -z-10 translate-x-1/3 -translate-y-1/3" />
-        <div className="max-w-7xl mx-auto px-6 grid md:grid-cols-12 gap-4 md:gap-16 items-center">
+        <div className="max-w-7xl mx-auto px-6 grid md:grid-cols-12 gap-6 md:gap-16 items-center">
           <div className="md:col-span-7">
             <div className="reveal-fast">
               <h1 className="text-5xl md:text-[80px] font-black leading-[1.1] md:leading-[0.95] tracking-tighter text-slate-900 mb-6 md:mb-10">
@@ -196,9 +195,9 @@ export default function App() {
 
           <div className="grid md:grid-cols-3 gap-12 md:gap-8 relative mb-16 md:mb-24">
             {[
-              { icon: <FileSearch className="w-8 h-8" />, title: "Linguagem e Técnica", desc: "Observa como o vendedor se comunica, quais perguntas faz e se domina a técnica necessária para conduzir a conversa." },
-              { icon: <Users className="w-8 h-8" />, title: "Relação e Empatia", desc: "Avalia se a conversa se mantém consultiva e se o atendimento cria confiança suficiente para avançar." },
-              { icon: <Target className="w-8 h-8" />, title: "Convergência", desc: "Analisa se a conversa avança, como as objeções são tratadas e onde a condução se perde." }
+              { icon: <FileSearch className="w-8 h-8" />, title: "Linguagem e Técnica", desc: "Observa como o vendedor se comunica, quais perguntas faz e se domina a técnica necessária para conduzir a conversa com clareza e direção." },
+              { icon: <Users className="w-8 h-8" />, title: "Relação e Empatia", desc: "Avalia se a conversa se mantém consultiva, se há escuta real e se o atendimento cria confiança suficiente para sustentar o avanço da venda." },
+              { icon: <Target className="w-8 h-8" />, title: "Convergência e Resultado", desc: "Analisa se a conversa avança, como as objeções são tratadas e em que ponto a condução se perde antes do fechamento." }
             ].map((step, idx) => (
               <div key={idx} className="relative group">
                 <div className="w-20 h-20 bg-slate-50 border border-slate-100 rounded-3xl flex items-center justify-center text-amber-600 mb-8 group-hover:bg-amber-500 group-hover:text-white transition-all duration-500 shadow-sm">
@@ -221,7 +220,7 @@ export default function App() {
         </div>
       </section>
 
-      {/* SECÇÃO ENTREGÁVEIS */}
+      {/* SECÇÃO ENTREGÁVEIS (RESTAURADA) */}
       <section id="entregaveis" className="py-24 md:py-32 bg-[#fcfcfd]">
         <div className="max-w-7xl mx-auto px-8">
           <div className="text-center max-w-4xl mx-auto mb-16 md:mb-20">
@@ -237,7 +236,7 @@ export default function App() {
               { icon: <UserCheck size={28} />, title: "Leitura Individual", desc: "Análise objetiva da condução de cada vendedor através de critérios técnicos." },
               { icon: <LayoutGrid size={28} />, title: "Matriz de Equipe", desc: "Visão consolidada da condução do time para identificar gargalos coletivos." },
               { icon: <MonitorPlay size={28} />, title: "Sessão Executiva", desc: "Interpretação dos achados e definição de prioridades imediatas de ação." },
-              { icon: <Droplets size={28} />, title: "Mapa de Vazamento", desc: "Diagnóstico técnico que revela onde a receita escorre durante a conversa." },
+              { icon: <Droplets size={28} />, title: "Mapa de Vazamento", desc: "Diagnóstico técnico que revela onde a receita escorre durante a conversa e por que a venda não se concretiza." },
               { icon: <Gauge size={28} />, title: "Índice de Maturidade", desc: "Indicador técnico que mede o nível de evolução comercial da operação." },
               { icon: <MessageCircleOff size={28} />, title: "Objeções Críticas", desc: "Leitura estruturada das objeções recorrentes e como contorná-los." }
             ].map((item, i) => (
@@ -251,7 +250,7 @@ export default function App() {
         </div>
       </section>
 
-      {/* BIO SECTION */}
+      {/* BIO SECTION (RESTAURADA) */}
       <section id="sobre" className="py-24 md:py-48 bg-[#0f1218] relative overflow-hidden">
         <div className="max-w-7xl mx-auto px-8 relative z-10">
           <div className="mb-12 md:mb-24">
@@ -275,7 +274,7 @@ export default function App() {
             <div className="md:col-span-7 space-y-8 md:space-y-10">
               <div className="space-y-6 md:space-y-8 text-zinc-200 text-lg md:text-2xl font-light leading-relaxed">
                 <p>
-                  Sou especialista em <span className="text-white font-bold italic underline decoration-amber-500/40 underline-offset-8">Estratégia Comercial</span>, com atuação em gigantes como <span className="text-white font-bold">Natura, McDonald’s e O Boticário</span>, liderando times, estruturando processos e respondendo diretamente por resultado.
+                  Sou especialista em <span className="text-white font-bold italic underline decoration-amber-500/40 underline-offset-8">Inteligência Comercial</span>, com atuação em gigantes como <span className="text-white font-bold">Natura, McDonald’s e O Boticário</span>, liderando times, estruturando processos e respondendo diretamente por resultado.
                 </p>
                 <p>
                   Hoje, minha missão é traduzir as estratégias dos grandes players para a realidade das PMEs. Através de uma análise profunda, transformo operações comerciais com foco <span className="text-white font-bold">em aumentar o faturamento</span> e trazer <span className="text-white font-bold">previsibilidade</span> ao negócio.
@@ -286,7 +285,7 @@ export default function App() {
         </div>
       </section>
 
-      {/* FAQ */}
+      {/* FAQ (RESTAURADO COMPLETO) */}
       <section id="faq" className="py-24 bg-slate-50 border-y border-slate-200">
         <div className="max-w-4xl mx-auto px-8">
           <div className="text-center mb-16">
@@ -295,10 +294,14 @@ export default function App() {
           </div>
           <div className="space-y-2 bg-white p-6 md:p-8 rounded-[1.5rem] shadow-sm border border-slate-100">
             {[
-              { q: "Isso é um treinamento para o time de vendas?", a: "Não. A análise não é um treinamento. Ela revela, com evidências, como a condução das conversas acontece hoje e onde o faturamento escorre." },
-              { q: "Vocês analisam todas as conversas do WhatsApp?", a: "São analisadas conversas reais em volume suficiente para identificar padrões consistentes de condução e pontos de ruptura." },
-              { q: "Meu time será exposto ou avaliado individualmente?", a: "O foco não é exposição. A leitura individual existe para apoiar decisões de gestão, não para constranger pessoas." },
-              { q: "Isso serve para qualquer tipo de empresa?", a: "A análise é indicada para operações em que o WhatsApp é um canal relevante de venda e que contam com equipas comerciais." }
+              { q: "Isso é um treinamento para o time de vendas?", a: "Não. A análise não é um treinamento nem uma capacitação comportamental. Ela revela, com evidências, como a condução das conversas acontece hoje e onde o faturamento escorre ao longo da operação." },
+              { q: "Vocês analisam todas as conversas do WhatsApp?", a: "São analisadas conversas reais, selecionadas por critério, em volume suficiente para identificar padrões consistentes de condução, pontos de ruptura e recorrências relevantes." },
+              { q: "Meu time será exposto ou avaliado individualmente?", a: "O foco não é exposição nem julgamento. A leitura individual existe para apoiar decisões de gestão, não para constranger pessoas." },
+              { q: "Isso substitui meu CRM ou meus indicadores comerciais?", a: "Não. Indicadores mostram o que aconteceu. A análise mostra por que aconteceu, a partir da forma como as conversas são conduzidas até o fechamento." },
+              { q: "Já usamos ferramentas de WhatsApp e CRM. Ainda faz sentido?", a: "Sim. Ferramentas organizam fluxo e dados. A análise observa comportamento, linguagem e direção da conversa." },
+              { q: "Em quanto tempo os resultados da análise ficam claros?", a: "A clareza costuma surgir já na devolutiva executiva, quando os padrões de condução e os pontos de vazamento de faturamento se tornam evidentes." },
+              { q: "Isso serve para qualquer tipo de empresa?", a: "A análise é indicada para operações em que o WhatsApp é um canal relevante de venda e que contam com equipes a partir de três vendedores." },
+              { q: "O que acontece depois da análise?", a: "Com os achados consolidados, é construído um dicionamento claro de ação, com prioridades definidas e recomendações práticas sobre o que ajustar na condução das vendas." }
             ].map((item, idx) => (
               <AccordionItem key={idx} question={item.q} answer={item.a} />
             ))}
@@ -328,7 +331,7 @@ export default function App() {
       
       <style dangerouslySetInnerHTML={{ __html: `
         html { scroll-behavior: smooth; }
-        .reveal-fast { animation: reveal 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+        .reveal-fast { animation: reveal 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
         @keyframes reveal { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
       `}} />
     </main>
