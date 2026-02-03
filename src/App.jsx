@@ -29,7 +29,7 @@ const CONFIG = {
 
 /**
  * Componente de Imagem Otimizado
- * Focado em performance e resolução do problema de pixelização.
+ * Focado em performance e nitidez (resolvendo pixelização).
  */
 function ImageWithFallback({ src, alt, className }) {
   const [failed, setFailed] = useState(false);
@@ -52,7 +52,7 @@ function ImageWithFallback({ src, alt, className }) {
         src={src} 
         alt={alt} 
         onLoad={() => setIsLoaded(true)}
-        className={`w-full h-full object-cover transition-opacity duration-500 ${isLoaded ? 'opacity-100' : 'opacity-0'}`}
+        className={`w-full h-full object-cover transition-opacity duration-700 ${isLoaded ? 'opacity-100' : 'opacity-0'}`}
         loading="lazy" 
         onError={() => setFailed(true)} 
         style={{
@@ -65,26 +65,6 @@ function ImageWithFallback({ src, alt, className }) {
       />
     </div>
   );
-}
-
-/**
- * Hook para detetar quando o elemento entra no ecrã (Otimização de Performance)
- */
-function useOnScreen(ref) {
-  const [isIntersecting, setIntersecting] = useState(false);
-
-  useEffect(() => {
-    const observer = new IntersectionObserver(
-      ([entry]) => setIntersecting(entry.isIntersecting),
-      { threshold: 0.1 }
-    );
-    if (ref.current) {
-      observer.observe(ref.current);
-    }
-    return () => observer.disconnect();
-  }, [ref]);
-
-  return isIntersecting;
 }
 
 const AccordionItem = ({ question, answer }) => {
@@ -150,30 +130,25 @@ export default function App() {
   const waLinkBase = `https://wa.me/${CONFIG.whatsapp}?text=`;
   const waLinkMain = waLinkBase + encodeURIComponent("Olá Valúcia, gostaria de entender como aplicar o Raio-X comercial na minha operação.");
   
-  // Refs para animação scroll-reveal
-  const heroRef = useRef();
-  const probRef = useRef();
-  const metodoRef = useRef();
-  
   return (
     <main className="min-h-screen bg-white font-sans selection:bg-amber-100 selection:text-amber-900 overflow-x-hidden">
       <Navbar />
 
-      {/* HERO SECTION */}
-      <section ref={heroRef} className="relative pt-40 pb-12 md:pt-60 md:pb-20 overflow-hidden bg-[#fcfcfd]">
+      {/* HERO SECTION - Espaçamento Mobile Otimizado (gap-8 e mt-4) */}
+      <section className="relative pt-32 pb-12 md:pt-60 md:pb-20 overflow-hidden bg-[#fcfcfd]">
         <div className="absolute top-0 right-0 w-[800px] h-[800px] bg-amber-500/[0.03] rounded-full blur-[150px] -z-10 translate-x-1/3 -translate-y-1/3" />
-        <div className="max-w-7xl mx-auto px-8 grid md:grid-cols-12 gap-16 items-center">
+        <div className="max-w-7xl mx-auto px-8 grid md:grid-cols-12 gap-8 md:gap-16 items-center">
           <div className="md:col-span-7">
             <div className="reveal">
-              <h1 className="text-5xl md:text-[80px] font-black leading-[1] md:leading-[0.95] tracking-tighter text-slate-900 mb-8 md:mb-10">
+              <h1 className="text-5xl md:text-[80px] font-black leading-[1] md:leading-[0.95] tracking-tighter text-slate-900 mb-6 md:mb-10">
                 Seu time atende bem,<br /><span className="text-amber-600">mas não vende?</span>
               </h1>
-              <p className="text-lg md:text-2xl text-slate-600 leading-relaxed max-w-xl mb-10 md:mb-12 font-medium">
+              <p className="text-lg md:text-2xl text-slate-600 leading-relaxed max-w-xl mb-6 md:mb-12 font-medium">
                 Descubra por que a falta de condução comercial faz com que boas conversas no WhatsApp não avancem para a decisão de compra.
               </p>
             </div>
           </div>
-          <div className="md:col-span-5 relative group mt-12 md:mt-0">
+          <div className="md:col-span-5 relative group mt-4 md:mt-0">
             <div className="relative z-10 overflow-hidden rounded-2xl border-8 border-white shadow-2xl transition-transform duration-700 group-hover:scale-[1.01]">
               <ImageWithFallback src={heroImage} alt="Valúcia Furtado" className="w-full aspect-[3/4]" />
             </div>
@@ -183,7 +158,7 @@ export default function App() {
       </section>
 
       {/* SECÇÃO PROBLEMA */}
-      <section id="problema" ref={probRef} className="pt-12 pb-24 md:pt-20 md:pb-48 bg-[#161a23] border-y border-white/5">
+      <section id="problema" className="pt-12 pb-24 md:pt-20 md:pb-48 bg-[#161a23] border-y border-white/5">
         <div className="max-w-7xl mx-auto px-8 text-white">
           <div className="grid md:grid-cols-2 gap-12 md:gap-20 items-end mb-16 md:mb-24">
             <div>
@@ -215,7 +190,7 @@ export default function App() {
       </section>
 
       {/* SECÇÃO O RAIO-X */}
-      <section id="metodo" ref={metodoRef} className="py-24 md:py-40 bg-white relative overflow-hidden">
+      <section id="metodo" className="py-24 md:py-40 bg-white relative overflow-hidden">
         <div className="max-w-7xl mx-auto px-8 relative z-10">
           <div className="text-center max-w-4xl mx-auto mb-20 md:mb-32">
             <span className="text-slate-400 font-black uppercase tracking-[0.4em] text-[10px] mb-6 block">O MÉTODO</span>
@@ -307,7 +282,7 @@ export default function App() {
           <div className="grid md:grid-cols-12 gap-12 md:gap-24 items-start">
             <div className="md:col-span-5 relative">
               <div className="aspect-[4/5] overflow-hidden rounded-3xl border border-white/10 shadow-2xl">
-                <ImageWithFallback src={bioImage} alt="Valúcia Furtado" className="w-full h-full" />
+                <ImageWithFallback src={bioImage} alt="Valúcia Furtado" className="w-full h-full object-cover" />
               </div>
               <div className="absolute -bottom-8 -right-8 bg-amber-500 p-6 md:p-8 rounded-2xl shadow-2xl hidden lg:block text-slate-950">
                 <p className="text-3xl md:text-4xl font-black leading-none">15+</p>
