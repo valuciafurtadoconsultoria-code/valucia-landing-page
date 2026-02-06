@@ -16,7 +16,7 @@ import {
   FileSearch
 } from "lucide-react";
 
-// CONFIGURAÇÃO GLOBAL - Mantendo os ficheiros WebP otimizados
+// CONFIGURAÇÃO GLOBAL - Nomes exatos dos seus ficheiros WebP otimizados
 const CONFIG = {
   whatsapp: "5541996987079",
   images: {
@@ -26,13 +26,25 @@ const CONFIG = {
 };
 
 /**
- * Componente de Imagem de Performance Extrema (Safari Optimized)
- * Resolve a pixelização e garante que o Safari Mobile prioriza o carregamento.
+ * Componente de Imagem com Performance Extrema (Safari/iOS Optimized)
+ * Força o navegador a descarregar a imagem antes de qualquer outro recurso.
  */
 function ImageWithFallback({ src, alt, className, isPriority = false }) {
   const [failed, setFailed] = useState(false);
   const [isLoaded, setIsLoaded] = useState(false);
   
+  // Injeção de Preload Nativo no Cabeçalho (Crítico para Safari)
+  useEffect(() => {
+    if (isPriority && src) {
+      const link = document.createElement('link');
+      link.rel = 'preload';
+      link.as = 'image';
+      link.href = src;
+      document.head.appendChild(link);
+      return () => { try { document.head.removeChild(link); } catch(e) {} };
+    }
+  }, [src, isPriority]);
+
   if (failed) {
     return (
       <div className={`${className} flex flex-col items-center justify-center bg-slate-100 text-slate-400 border border-slate-200`}>
@@ -45,7 +57,7 @@ function ImageWithFallback({ src, alt, className, isPriority = false }) {
   }
 
   return (
-    <div className={`${className} bg-slate-200 relative overflow-hidden`} style={{ aspectRatio: '3/4' }}>
+    <div className={`${className} bg-slate-200 relative overflow-hidden`} style={{ aspectRatio: '3/4', contain: 'content' }}>
       {!isLoaded && (
         <div className="absolute inset-0 bg-slate-100 flex items-center justify-center">
              <div className="w-6 h-6 border-2 border-amber-500/20 border-t-amber-500 rounded-full animate-spin" />
@@ -57,15 +69,16 @@ function ImageWithFallback({ src, alt, className, isPriority = false }) {
         width="600"
         height="800"
         onLoad={() => setIsLoaded(true)}
-        className={`w-full h-full object-cover transition-opacity duration-300 ${isLoaded ? 'opacity-100' : 'opacity-0'}`}
-        // fetchpriority em minúsculas evita avisos do React e prioriza no Safari
+        className={`w-full h-full object-cover transition-opacity duration-200 ${isLoaded ? 'opacity-100' : 'opacity-0'}`}
         fetchpriority={isPriority ? "high" : "auto"}
         loading={isPriority ? "eager" : "lazy"}
         decoding={isPriority ? "sync" : "async"}
         onError={() => setFailed(true)} 
         style={{
           WebkitBackfaceVisibility: 'hidden',
-          transform: 'translateZ(0)', // Aceleração gráfica nativa do iPhone
+          backfaceVisibility: 'hidden',
+          transform: 'translate3d(0,0,0)', // Força o uso da GPU do iPhone
+          imageRendering: 'auto'
         }}
       />
     </div>
@@ -95,7 +108,10 @@ const AccordionItem = ({ question, answer }) => {
 const Navbar = () => {
   const [scrolled, setScrolled] = useState(false);
   useEffect(() => {
-    const handleScroll = () => setScrolled(window.scrollY > 20);
+    const handleScroll = () => {
+      const isScrolled = window.scrollY > 20;
+      setScrolled(isScrolled);
+    };
     window.addEventListener("scroll", handleScroll, { passive: true });
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
@@ -107,11 +123,11 @@ const Navbar = () => {
           Valúcia<span className="text-amber-500">.</span>Furtado
         </div>
         <div className="hidden lg:flex items-center gap-8 text-[11px] font-bold uppercase tracking-[0.2em] text-slate-600">
-          <a href="#problema" className="hover:text-amber-600 transition-colors">O Problema</a>
-          <a href="#metodo" className="hover:text-amber-600 transition-colors">Raio-X</a>
-          <a href="#entregaveis" className="hover:text-amber-600 transition-colors">Entregáveis</a>
-          <a href="#sobre" className="hover:text-amber-600 transition-colors">Sobre</a>
-          <a href="#faq" className="hover:text-amber-600 transition-colors">FAQ</a>
+          <a href="#problema" className="hover:text-amber-600">O Problema</a>
+          <a href="#metodo" className="hover:text-amber-600">Raio-X</a>
+          <a href="#entregaveis" className="hover:text-amber-600">Entregáveis</a>
+          <a href="#sobre" className="hover:text-amber-600">Sobre</a>
+          <a href="#faq" className="hover:text-amber-600">FAQ</a>
           <a href="#contato" className="bg-slate-900 text-white px-6 py-2.5 rounded-md font-black hover:bg-amber-500 transition-all">Contato</a>
         </div>
       </div>
@@ -131,7 +147,7 @@ export default function App() {
         <div className="absolute top-0 right-0 w-[800px] h-[800px] bg-amber-500/[0.03] rounded-full blur-[150px] -z-10 translate-x-1/3 -translate-y-1/3" />
         <div className="max-w-7xl mx-auto px-6 grid md:grid-cols-12 gap-4 md:gap-16 items-center">
           <div className="md:col-span-7">
-            <div className="reveal-fast">
+            <div className="reveal-instant">
               <h1 className="text-5xl md:text-[80px] font-black leading-[1.1] md:leading-[0.95] tracking-tighter text-slate-900 mb-4 md:mb-10">
                 Seu time atende bem,<br /><span className="text-amber-600">mas não vende?</span>
               </h1>
@@ -174,7 +190,6 @@ export default function App() {
             ].map((item, idx) => (
               <div key={idx} className="bg-[#1c212c] p-8 md:p-14 border-l-4 border-amber-500 shadow-xl group hover:bg-[#232936] transition-all duration-500 relative overflow-hidden">
                 <div className="flex flex-col md:flex-row md:items-center gap-6 md:gap-12 relative z-10">
-                  {/* ALTERAÇÃO: Cor dos números alterada para amber-500 (laranja) */}
                   <span className="text-5xl md:text-7xl font-black text-amber-500 transition-colors tabular-nums tracking-tighter block">{item.num}</span>
                   <div className="space-y-3">
                     <h3 className="font-bold text-2xl md:text-3xl text-white group-hover:text-amber-400 transition-colors tracking-tight">{item.title}</h3>
@@ -187,7 +202,7 @@ export default function App() {
         </div>
       </section>
 
-      {/* SECÇÃO O RAIO-X */}
+      {/* SECÇÃO O MÉTODO */}
       <section id="metodo" className="py-24 md:py-40 bg-white relative overflow-hidden">
         <div className="max-w-7xl mx-auto px-8 relative z-10">
           <div className="text-center max-w-4xl mx-auto mb-20 md:mb-32">
@@ -279,7 +294,7 @@ export default function App() {
             <div className="md:col-span-7 space-y-8 md:space-y-10">
               <div className="space-y-6 md:space-y-8 text-zinc-200 text-lg md:text-2xl font-light leading-relaxed">
                 <p>
-                  Sou especialista em <span className="text-white font-bold italic underline decoration-amber-500/40 underline-offset-8">Estratégia Comercial</span>, com atuação em gigantes como <span className="text-white font-bold">Natura, McDonald’s e O Boticário</span>, liderando times, estruturando processos e respondendo diretamente por resultando.
+                  Sou especialista em <span className="text-white font-bold italic underline decoration-amber-500/40 underline-offset-8">Estratégia Comercial</span>, com atuação em gigantes como <span className="text-white font-bold">Natura, McDonald’s e O Boticário</span>, liderando times, estruturando processos e respondendo diretamente por resultado.
                 </p>
                 <p>
                   Hoje, minha missão é traduzir as estratégias dos grandes players para a realidade das PMEs. Através de uma análise profunda, transformo operações comerciais com foco <span className="text-white font-bold">em aumentar o faturamento</span> e trazer <span className="text-white font-bold">previsibilidade</span> ao negócio.
@@ -297,7 +312,7 @@ export default function App() {
             <span className="text-amber-600 font-black uppercase tracking-[0.4em] text-[10px] mb-6 block">Dúvidas Frequentes</span>
             <h2 className="text-3xl md:text-4xl font-black text-slate-900 tracking-tight">FAQ</h2>
           </div>
-          <div className="space-y-2 bg-white p-6 md:p-8 rounded-[1.5rem] md:rounded-[2rem] shadow-sm border border-slate-100">
+          <div className="space-y-2 bg-white p-6 md:p-8 rounded-[1.5rem] shadow-sm border border-slate-100">
             {[
               { q: "Isso é um treinamento para o time de vendas?", a: "Não. A análise não é um treinamento nem uma capacitação comportamental. Ela revela, com evidências, como a condução das conversas acontece hoje e onde o faturamento escorre ao longo da operação." },
               { q: "Vocês analisam todas as conversas do WhatsApp?", a: "São analisadas conversas reais, selecionadas por critério, em volume suficiente para identificar padrões consistentes de condução, pontos de ruptura e recorrências relevantes." },
@@ -317,7 +332,7 @@ export default function App() {
       {/* CTA FINAL */}
       <section id="contato" className="bg-white text-slate-900 py-24 md:py-48 relative overflow-hidden text-center">
         <div className="max-w-5xl mx-auto px-8 relative z-10 text-center space-y-12">
-          <div className="reveal-fast">
+          <div className="reveal-instant">
             <h2 className="text-4xl md:text-6xl font-black tracking-tight leading-tight mb-8">Transforme conversas em <span className="text-amber-500 underline decoration-amber-500/10 underline-offset-[12px]">faturamento</span></h2>
             <p className="mt-6 text-slate-600 text-lg md:text-3xl leading-relaxed max-w-2xl mx-auto font-medium mb-12 md:mb-16">
               Quando a condução é clara, o faturamento deixa de depender de esforço individual e se torna uma estratégia de conversão.
@@ -336,8 +351,8 @@ export default function App() {
       
       <style dangerouslySetInnerHTML={{ __html: `
         html { scroll-behavior: smooth; }
-        .reveal-fast { animation: reveal 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
-        @keyframes reveal { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
+        .reveal-instant { animation: reveal 0.2s ease-out forwards; }
+        @keyframes reveal { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
       `}} />
     </main>
   );
