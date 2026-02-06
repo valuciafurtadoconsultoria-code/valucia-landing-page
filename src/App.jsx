@@ -1,4 +1,4 @@
-import React, { useMemo, useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { 
   MessageCircle, 
   AlertCircle, 
@@ -16,7 +16,7 @@ import {
   FileSearch
 } from "lucide-react";
 
-// CONFIGURAÇÃO GLOBAL - Nomes exatos dos seus ficheiros WebP otimizados
+// CONFIGURAÇÃO GLOBAL - Ficheiros WebP leves
 const CONFIG = {
   whatsapp: "5541996987079",
   images: {
@@ -26,58 +26,36 @@ const CONFIG = {
 };
 
 /**
- * Componente de Imagem com Performance Extrema (Safari/iOS Optimized)
- * Força o navegador a descarregar a imagem antes de qualquer outro recurso.
+ * ImageWithFallback - Versão Ultra-Safari
+ * Focada em eliminar o tempo de espera do navegador.
  */
 function ImageWithFallback({ src, alt, className, isPriority = false }) {
   const [failed, setFailed] = useState(false);
-  const [isLoaded, setIsLoaded] = useState(false);
   
-  // Injeção de Preload Nativo no Cabeçalho (Crítico para Safari)
-  useEffect(() => {
-    if (isPriority && src) {
-      const link = document.createElement('link');
-      link.rel = 'preload';
-      link.as = 'image';
-      link.href = src;
-      document.head.appendChild(link);
-      return () => { try { document.head.removeChild(link); } catch(e) {} };
-    }
-  }, [src, isPriority]);
-
   if (failed) {
     return (
-      <div className={`${className} flex flex-col items-center justify-center bg-slate-100 text-slate-400 border border-slate-200`}>
-        <AlertCircle className="opacity-20 mb-2" size={32} />
-        <span className="text-[10px] font-bold uppercase tracking-[0.1em] text-center px-4 leading-relaxed">
-          Ficheiro não encontrado:<br/>{src.split('/').pop()}
-        </span>
+      <div className={`${className} flex items-center justify-center bg-slate-100 text-slate-400 border border-slate-200 aspect-[3/4]`}>
+        <span className="text-[10px] font-bold uppercase tracking-[0.1em]">Erro: {src.split('/').pop()}</span>
       </div>
     );
   }
 
   return (
-    <div className={`${className} bg-slate-200 relative overflow-hidden`} style={{ aspectRatio: '3/4', contain: 'content' }}>
-      {!isLoaded && (
-        <div className="absolute inset-0 bg-slate-100 flex items-center justify-center">
-             <div className="w-6 h-6 border-2 border-amber-500/20 border-t-amber-500 rounded-full animate-spin" />
-        </div>
-      )}
+    <div className={`${className} bg-slate-100 relative overflow-hidden`} style={{ aspectRatio: '3/4', contain: 'size layout paint' }}>
       <img 
         src={src} 
         alt={alt} 
         width="600"
         height="800"
-        onLoad={() => setIsLoaded(true)}
-        className={`w-full h-full object-cover transition-opacity duration-200 ${isLoaded ? 'opacity-100' : 'opacity-0'}`}
+        // Atributos de força bruta para o Safari
         fetchpriority={isPriority ? "high" : "auto"}
         loading={isPriority ? "eager" : "lazy"}
         decoding={isPriority ? "sync" : "async"}
         onError={() => setFailed(true)} 
+        className="w-full h-full object-cover block"
         style={{
           WebkitBackfaceVisibility: 'hidden',
-          backfaceVisibility: 'hidden',
-          transform: 'translate3d(0,0,0)', // Força o uso da GPU do iPhone
+          WebkitTransform: 'translate3d(0,0,0)', // Força uso da GPU no iOS
           imageRendering: 'auto'
         }}
       />
@@ -98,7 +76,7 @@ const AccordionItem = ({ question, answer }) => {
           {isOpen ? <Minus size={20} className="text-amber-500" /> : <Plus size={20} className="text-slate-400" />}
         </div>
       </button>
-      <div className={`overflow-hidden transition-all duration-300 ${isOpen ? "max-h-[500px] pb-6" : "max-h-0"}`}>
+      <div className={`overflow-hidden transition-all duration-300 ${isOpen ? "max-h-[600px] pb-6" : "max-h-0"}`}>
         <p className="text-slate-600 leading-relaxed text-lg">{answer}</p>
       </div>
     </div>
@@ -108,10 +86,7 @@ const AccordionItem = ({ question, answer }) => {
 const Navbar = () => {
   const [scrolled, setScrolled] = useState(false);
   useEffect(() => {
-    const handleScroll = () => {
-      const isScrolled = window.scrollY > 20;
-      setScrolled(isScrolled);
-    };
+    const handleScroll = () => setScrolled(window.scrollY > 20);
     window.addEventListener("scroll", handleScroll, { passive: true });
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
@@ -142,22 +117,20 @@ export default function App() {
     <main className="min-h-screen bg-white font-sans selection:bg-amber-100 selection:text-amber-900 overflow-x-hidden">
       <Navbar />
 
-      {/* HERO SECTION */}
+      {/* HERO SECTION - Ajustada para renderização imediata */}
       <section className="relative pt-24 pb-12 md:pt-60 md:pb-20 overflow-hidden bg-[#fcfcfd]">
         <div className="absolute top-0 right-0 w-[800px] h-[800px] bg-amber-500/[0.03] rounded-full blur-[150px] -z-10 translate-x-1/3 -translate-y-1/3" />
         <div className="max-w-7xl mx-auto px-6 grid md:grid-cols-12 gap-4 md:gap-16 items-center">
           <div className="md:col-span-7">
-            <div className="reveal-instant">
-              <h1 className="text-5xl md:text-[80px] font-black leading-[1.1] md:leading-[0.95] tracking-tighter text-slate-900 mb-4 md:mb-10">
-                Seu time atende bem,<br /><span className="text-amber-600">mas não vende?</span>
-              </h1>
-              <p className="text-lg md:text-2xl text-slate-600 leading-relaxed max-w-xl mb-6 md:mb-12 font-medium">
-                Descubra por que a falta de condução comercial faz com que boas conversas no WhatsApp não avancem para a decisão de compra.
-              </p>
-            </div>
+            <h1 className="text-5xl md:text-[80px] font-black leading-[1.1] md:leading-[0.95] tracking-tighter text-slate-900 mb-6 md:mb-10">
+              Seu time atende bem,<br /><span className="text-amber-600">mas não vende?</span>
+            </h1>
+            <p className="text-lg md:text-2xl text-slate-600 leading-relaxed max-w-xl mb-6 md:mb-12 font-medium">
+              Descubra por que a falta de condução comercial faz com que boas conversas no WhatsApp não avancem para a decisão de compra.
+            </p>
           </div>
           <div className="md:col-span-5 relative mt-4 md:mt-0">
-            <div className="relative z-10 overflow-hidden rounded-2xl border-4 md:border-8 border-white shadow-2xl transition-transform duration-700">
+            <div className="relative z-10 overflow-hidden rounded-2xl border-4 md:border-8 border-white shadow-2xl">
               <ImageWithFallback 
                 src={CONFIG.images.hero} 
                 alt="Valúcia Furtado" 
@@ -188,7 +161,7 @@ export default function App() {
               { title: "Conversas que não avançam", desc: "Aceitar o “vou pensar” como ponto final interrompe a condução e encerra a venda antes do tempo certo.", num: "03" },
               { title: "Excesso de Afetividade", desc: "O atendimento extremamente afetuoso com jargões que reduzem o profissionalismo e a autoridade comercial.", num: "04" }
             ].map((item, idx) => (
-              <div key={idx} className="bg-[#1c212c] p-8 md:p-14 border-l-4 border-amber-500 shadow-xl group hover:bg-[#232936] transition-all duration-500 relative overflow-hidden">
+              <div key={idx} className="bg-[#1c212c] p-8 md:p-14 border-l-4 border-amber-500 shadow-xl group hover:bg-[#232936] transition-all duration-300 relative overflow-hidden">
                 <div className="flex flex-col md:flex-row md:items-center gap-6 md:gap-12 relative z-10">
                   <span className="text-5xl md:text-7xl font-black text-amber-500 transition-colors tabular-nums tracking-tighter block">{item.num}</span>
                   <div className="space-y-3">
@@ -202,7 +175,7 @@ export default function App() {
         </div>
       </section>
 
-      {/* SECÇÃO O MÉTODO */}
+      {/* SECÇÃO O RAIO-X */}
       <section id="metodo" className="py-24 md:py-40 bg-white relative overflow-hidden">
         <div className="max-w-7xl mx-auto px-8 relative z-10">
           <div className="text-center max-w-4xl mx-auto mb-20 md:mb-32">
@@ -332,16 +305,14 @@ export default function App() {
       {/* CTA FINAL */}
       <section id="contato" className="bg-white text-slate-900 py-24 md:py-48 relative overflow-hidden text-center">
         <div className="max-w-5xl mx-auto px-8 relative z-10 text-center space-y-12">
-          <div className="reveal-instant">
-            <h2 className="text-4xl md:text-6xl font-black tracking-tight leading-tight mb-8">Transforme conversas em <span className="text-amber-500 underline decoration-amber-500/10 underline-offset-[12px]">faturamento</span></h2>
-            <p className="mt-6 text-slate-600 text-lg md:text-3xl leading-relaxed max-w-2xl mx-auto font-medium mb-12 md:mb-16">
-              Quando a condução é clara, o faturamento deixa de depender de esforço individual e se torna uma estratégia de conversão.
-            </p>
-            <a href={waLinkMain} target="_blank" rel="noreferrer" className="group inline-flex justify-center items-center gap-4 px-10 md:px-12 py-6 md:py-7 bg-slate-900 text-white font-black text-xl hover:bg-amber-500 transition-all rounded-2xl shadow-2xl hover:scale-[1.03]">
-              <MessageCircle size={26} className="text-amber-400 group-hover:text-white transition-colors" />
-              Quero aplicar esta análise na minha operação
-            </a>
-          </div>
+          <h2 className="text-4xl md:text-6xl font-black tracking-tight leading-tight mb-8">Transforme conversas em <span className="text-amber-500 underline decoration-amber-500/10 underline-offset-[12px]">faturamento</span></h2>
+          <p className="mt-6 text-slate-600 text-lg md:text-3xl leading-relaxed max-w-2xl mx-auto font-medium mb-12 md:mb-16">
+            Quando a condução é clara, o faturamento deixa de depender de esforço individual e se torna uma estratégia de conversão.
+          </p>
+          <a href={waLinkMain} target="_blank" rel="noreferrer" className="group inline-flex justify-center items-center gap-4 px-10 md:px-12 py-6 md:py-7 bg-slate-900 text-white font-black text-xl hover:bg-amber-500 transition-all rounded-2xl shadow-2xl hover:scale-[1.03]">
+            <MessageCircle size={26} className="text-amber-400 group-hover:text-white transition-colors" />
+            Quero aplicar esta análise na minha operação
+          </a>
         </div>
       </section>
 
@@ -351,8 +322,6 @@ export default function App() {
       
       <style dangerouslySetInnerHTML={{ __html: `
         html { scroll-behavior: smooth; }
-        .reveal-instant { animation: reveal 0.2s ease-out forwards; }
-        @keyframes reveal { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
       `}} />
     </main>
   );
