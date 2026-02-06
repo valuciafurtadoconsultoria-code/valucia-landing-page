@@ -16,7 +16,7 @@ import {
   FileSearch
 } from "lucide-react";
 
-// CONFIGURAÇÃO GLOBAL - Ficheiros WebP leves
+// CONFIGURAÇÃO GLOBAL - Nomes exatos dos seus ficheiros WebP leves (118KB/91KB)
 const CONFIG = {
   whatsapp: "5541996987079",
   images: {
@@ -26,12 +26,24 @@ const CONFIG = {
 };
 
 /**
- * ImageWithFallback - Versão Ultra-Safari
- * Focada em eliminar o tempo de espera do navegador.
+ * Componente de Imagem "Instant-On" (Otimizado para Safari Mobile)
+ * Remove estados de espera para garantir que a imagem aparece mal o browser recebe os dados.
  */
 function ImageWithFallback({ src, alt, className, isPriority = false }) {
   const [failed, setFailed] = useState(false);
-  
+
+  // Injeção de Preload Nativo no Cabeçalho
+  useEffect(() => {
+    if (isPriority && src) {
+      const link = document.createElement('link');
+      link.rel = 'preload';
+      link.as = 'image';
+      link.href = src;
+      document.head.appendChild(link);
+      return () => { try { document.head.removeChild(link); } catch(e) {} };
+    }
+  }, [src, isPriority]);
+
   if (failed) {
     return (
       <div className={`${className} flex items-center justify-center bg-slate-100 text-slate-400 border border-slate-200 aspect-[3/4]`}>
@@ -41,21 +53,21 @@ function ImageWithFallback({ src, alt, className, isPriority = false }) {
   }
 
   return (
-    <div className={`${className} bg-slate-100 relative overflow-hidden`} style={{ aspectRatio: '3/4', contain: 'size layout paint' }}>
+    <div className={`${className} bg-slate-200 relative overflow-hidden`} style={{ aspectRatio: '3/4', contain: 'content' }}>
       <img 
         src={src} 
         alt={alt} 
         width="600"
         height="800"
-        // Atributos de força bruta para o Safari
         fetchpriority={isPriority ? "high" : "auto"}
         loading={isPriority ? "eager" : "lazy"}
         decoding={isPriority ? "sync" : "async"}
         onError={() => setFailed(true)} 
-        className="w-full h-full object-cover block"
+        className="w-full h-full object-cover block opacity-100"
         style={{
           WebkitBackfaceVisibility: 'hidden',
-          WebkitTransform: 'translate3d(0,0,0)', // Força uso da GPU no iOS
+          backfaceVisibility: 'hidden',
+          transform: 'translate3d(0,0,0)', // Aceleração GPU iPhone
           imageRendering: 'auto'
         }}
       />
@@ -76,7 +88,7 @@ const AccordionItem = ({ question, answer }) => {
           {isOpen ? <Minus size={20} className="text-amber-500" /> : <Plus size={20} className="text-slate-400" />}
         </div>
       </button>
-      <div className={`overflow-hidden transition-all duration-300 ${isOpen ? "max-h-[600px] pb-6" : "max-h-0"}`}>
+      <div className={`overflow-hidden transition-all duration-300 ${isOpen ? "max-h-[500px] pb-6" : "max-h-0"}`}>
         <p className="text-slate-600 leading-relaxed text-lg">{answer}</p>
       </div>
     </div>
@@ -86,10 +98,13 @@ const AccordionItem = ({ question, answer }) => {
 const Navbar = () => {
   const [scrolled, setScrolled] = useState(false);
   useEffect(() => {
-    const handleScroll = () => setScrolled(window.scrollY > 20);
+    const handleScroll = () => {
+      const status = window.scrollY > 20;
+      if (status !== scrolled) setScrolled(status);
+    };
     window.addEventListener("scroll", handleScroll, { passive: true });
     return () => window.removeEventListener("scroll", handleScroll);
-  }, []);
+  }, [scrolled]);
 
   return (
     <nav className={`fixed w-full z-50 transition-all duration-500 ${scrolled ? "bg-white/95 backdrop-blur-xl border-b border-slate-100 py-3 shadow-sm" : "bg-transparent py-6"}`}>
@@ -117,12 +132,12 @@ export default function App() {
     <main className="min-h-screen bg-white font-sans selection:bg-amber-100 selection:text-amber-900 overflow-x-hidden">
       <Navbar />
 
-      {/* HERO SECTION - Ajustada para renderização imediata */}
+      {/* HERO SECTION */}
       <section className="relative pt-24 pb-12 md:pt-60 md:pb-20 overflow-hidden bg-[#fcfcfd]">
         <div className="absolute top-0 right-0 w-[800px] h-[800px] bg-amber-500/[0.03] rounded-full blur-[150px] -z-10 translate-x-1/3 -translate-y-1/3" />
         <div className="max-w-7xl mx-auto px-6 grid md:grid-cols-12 gap-4 md:gap-16 items-center">
           <div className="md:col-span-7">
-            <h1 className="text-5xl md:text-[80px] font-black leading-[1.1] md:leading-[0.95] tracking-tighter text-slate-900 mb-6 md:mb-10">
+            <h1 className="text-5xl md:text-[80px] font-black leading-[1.1] md:leading-[0.95] tracking-tighter text-slate-900 mb-4 md:mb-10">
               Seu time atende bem,<br /><span className="text-amber-600">mas não vende?</span>
             </h1>
             <p className="text-lg md:text-2xl text-slate-600 leading-relaxed max-w-xl mb-6 md:mb-12 font-medium">
@@ -131,12 +146,7 @@ export default function App() {
           </div>
           <div className="md:col-span-5 relative mt-4 md:mt-0">
             <div className="relative z-10 overflow-hidden rounded-2xl border-4 md:border-8 border-white shadow-2xl">
-              <ImageWithFallback 
-                src={CONFIG.images.hero} 
-                alt="Valúcia Furtado" 
-                className="w-full" 
-                isPriority={true} 
-              />
+              <ImageWithFallback src={CONFIG.images.hero} alt="Valúcia Furtado" className="w-full" isPriority={true} />
             </div>
             <div className="absolute -bottom-6 -left-6 w-32 h-32 border-b-4 border-l-4 border-amber-500/20 rounded-bl-3xl -z-10" />
           </div>
@@ -175,7 +185,7 @@ export default function App() {
         </div>
       </section>
 
-      {/* SECÇÃO O RAIO-X */}
+      {/* SECÇÃO O MÉTODO */}
       <section id="metodo" className="py-24 md:py-40 bg-white relative overflow-hidden">
         <div className="max-w-7xl mx-auto px-8 relative z-10">
           <div className="text-center max-w-4xl mx-auto mb-20 md:mb-32">
