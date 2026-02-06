@@ -16,7 +16,7 @@ import {
   FileSearch
 } from "lucide-react";
 
-// CONFIGURAÇÃO GLOBAL - Nomes exatos dos seus ficheiros WebP leves (118KB/91KB)
+// CONFIGURAÇÃO GLOBAL - Caminhos das suas imagens WebP
 const CONFIG = {
   whatsapp: "5541996987079",
   images: {
@@ -26,34 +26,25 @@ const CONFIG = {
 };
 
 /**
- * Componente de Imagem "Instant-On" (Otimizado para Safari Mobile)
- * Remove estados de espera para garantir que a imagem aparece mal o browser recebe os dados.
+ * Componente de Imagem Otimizado
+ * Focado em estabilidade e visibilidade imediata.
  */
 function ImageWithFallback({ src, alt, className, isPriority = false }) {
   const [failed, setFailed] = useState(false);
 
-  // Injeção de Preload Nativo no Cabeçalho
-  useEffect(() => {
-    if (isPriority && src) {
-      const link = document.createElement('link');
-      link.rel = 'preload';
-      link.as = 'image';
-      link.href = src;
-      document.head.appendChild(link);
-      return () => { try { document.head.removeChild(link); } catch(e) {} };
-    }
-  }, [src, isPriority]);
-
   if (failed) {
     return (
       <div className={`${className} flex items-center justify-center bg-slate-100 text-slate-400 border border-slate-200 aspect-[3/4]`}>
-        <span className="text-[10px] font-bold uppercase tracking-[0.1em]">Erro: {src.split('/').pop()}</span>
+        <div className="text-center p-4">
+          <AlertCircle className="mx-auto mb-2 opacity-50" size={24} />
+          <span className="text-[10px] font-bold uppercase tracking-widest">Imagem não encontrada</span>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className={`${className} bg-slate-200 relative overflow-hidden`} style={{ aspectRatio: '3/4', contain: 'content' }}>
+    <div className={`${className} bg-slate-100 relative overflow-hidden`} style={{ aspectRatio: '3/4' }}>
       <img 
         src={src} 
         alt={alt} 
@@ -63,12 +54,10 @@ function ImageWithFallback({ src, alt, className, isPriority = false }) {
         loading={isPriority ? "eager" : "lazy"}
         decoding={isPriority ? "sync" : "async"}
         onError={() => setFailed(true)} 
-        className="w-full h-full object-cover block opacity-100"
+        className="w-full h-full object-cover block"
         style={{
           WebkitBackfaceVisibility: 'hidden',
-          backfaceVisibility: 'hidden',
-          transform: 'translate3d(0,0,0)', // Aceleração GPU iPhone
-          imageRendering: 'auto'
+          transform: 'translateZ(0)'
         }}
       />
     </div>
@@ -98,13 +87,10 @@ const AccordionItem = ({ question, answer }) => {
 const Navbar = () => {
   const [scrolled, setScrolled] = useState(false);
   useEffect(() => {
-    const handleScroll = () => {
-      const status = window.scrollY > 20;
-      if (status !== scrolled) setScrolled(status);
-    };
+    const handleScroll = () => setScrolled(window.scrollY > 20);
     window.addEventListener("scroll", handleScroll, { passive: true });
     return () => window.removeEventListener("scroll", handleScroll);
-  }, [scrolled]);
+  }, []);
 
   return (
     <nav className={`fixed w-full z-50 transition-all duration-500 ${scrolled ? "bg-white/95 backdrop-blur-xl border-b border-slate-100 py-3 shadow-sm" : "bg-transparent py-6"}`}>
@@ -118,7 +104,7 @@ const Navbar = () => {
           <a href="#entregaveis" className="hover:text-amber-600">Entregáveis</a>
           <a href="#sobre" className="hover:text-amber-600">Sobre</a>
           <a href="#faq" className="hover:text-amber-600">FAQ</a>
-          <a href="#contato" className="bg-slate-900 text-white px-6 py-2.5 rounded-md font-black hover:bg-amber-500 transition-all">Contato</a>
+          <a href="#contato" className="bg-slate-900 text-white px-5 py-2 rounded-lg font-black hover:bg-amber-500 transition-all">Contato</a>
         </div>
       </div>
     </nav>
@@ -135,14 +121,16 @@ export default function App() {
       {/* HERO SECTION */}
       <section className="relative pt-24 pb-12 md:pt-60 md:pb-20 overflow-hidden bg-[#fcfcfd]">
         <div className="absolute top-0 right-0 w-[800px] h-[800px] bg-amber-500/[0.03] rounded-full blur-[150px] -z-10 translate-x-1/3 -translate-y-1/3" />
-        <div className="max-w-7xl mx-auto px-6 grid md:grid-cols-12 gap-4 md:gap-16 items-center">
+        <div className="max-w-7xl mx-auto px-6 grid md:grid-cols-12 gap-8 md:gap-16 items-center">
           <div className="md:col-span-7">
-            <h1 className="text-5xl md:text-[80px] font-black leading-[1.1] md:leading-[0.95] tracking-tighter text-slate-900 mb-4 md:mb-10">
-              Seu time atende bem,<br /><span className="text-amber-600">mas não vende?</span>
-            </h1>
-            <p className="text-lg md:text-2xl text-slate-600 leading-relaxed max-w-xl mb-6 md:mb-12 font-medium">
-              Descubra por que a falta de condução comercial faz com que boas conversas no WhatsApp não avancem para a decisão de compra.
-            </p>
+            <div className="reveal">
+              <h1 className="text-5xl md:text-[80px] font-black leading-[1.1] md:leading-[0.95] tracking-tighter text-slate-900 mb-6 md:mb-10">
+                Seu time atende bem,<br /><span className="text-amber-600">mas não vende?</span>
+              </h1>
+              <p className="text-lg md:text-2xl text-slate-600 leading-relaxed max-w-xl mb-6 md:mb-12 font-medium">
+                Descubra por que a falta de condução comercial faz com que boas conversas no WhatsApp não avancem para a decisão de compra.
+              </p>
+            </div>
           </div>
           <div className="md:col-span-5 relative mt-4 md:mt-0">
             <div className="relative z-10 overflow-hidden rounded-2xl border-4 md:border-8 border-white shadow-2xl">
@@ -193,7 +181,6 @@ export default function App() {
             <h2 className="text-4xl md:text-6xl font-black tracking-tighter text-slate-900 leading-[1.1] mb-8">
               O <span className="text-amber-600 underline underline-offset-[12px] decoration-amber-500/20">Raio-X</span> que revela a erosão do seu lucro
             </h2>
-            <div className="w-24 h-1 bg-amber-500 mx-auto rounded-full mt-10" />
           </div>
 
           <div className="grid md:grid-cols-3 gap-12 md:gap-8 relative mb-16 md:mb-24">
@@ -201,14 +188,14 @@ export default function App() {
               { icon: <FileSearch className="w-8 h-8" />, title: "Linguagem e Técnica", desc: "Observa como o vendedor se comunica, quais perguntas faz e se domina a técnica necessária para conduzir a conversa com clareza e direção." },
               { icon: <Users className="w-8 h-8" />, title: "Relação e Empatia", desc: "Avalia se a conversa se mantém consultiva, se há escuta real e se o atendimento cria confiança suficiente para sustentar o avanço da venda." },
               { icon: <Target className="w-8 h-8" />, title: "Convergência e Resultado", desc: "Analisa se a conversa avança, como as objeções são tratadas e em que ponto a condução se perde antes do fechamento." }
-            ].map((step, idx) => (
-              <div key={idx} className="relative group">
-                <div className="w-20 h-20 bg-slate-50 border border-slate-100 rounded-3xl flex items-center justify-center text-amber-600 mb-8 group-hover:bg-amber-500 group-hover:text-white transition-all duration-500 shadow-sm">
-                  {step.icon}
+            ].map((item, idx) => (
+              <div key={idx} className="relative">
+                <div className="w-20 h-20 bg-slate-50 border border-slate-100 rounded-3xl flex items-center justify-center text-amber-600 mb-8 shadow-sm">
+                  {item.icon}
                 </div>
                 <div className="space-y-4">
-                  <h3 className="text-2xl font-black text-slate-900 tracking-tight">{step.title}</h3>
-                  <p className="text-slate-600 leading-relaxed text-lg font-medium">{step.desc}</p>
+                  <h3 className="text-2xl font-black text-slate-900 tracking-tight">{item.title}</h3>
+                  <p className="text-slate-600 leading-relaxed text-lg font-medium">{item.desc}</p>
                 </div>
               </div>
             ))}
@@ -332,6 +319,8 @@ export default function App() {
       
       <style dangerouslySetInnerHTML={{ __html: `
         html { scroll-behavior: smooth; }
+        .reveal { animation: reveal 0.5s ease-out forwards; }
+        @keyframes reveal { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
       `}} />
     </main>
   );
